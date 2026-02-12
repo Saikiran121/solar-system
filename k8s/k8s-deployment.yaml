@@ -17,6 +17,6 @@ spec:
     spec:
       containers:
       - name: solar-system
-        image: saikiran8050/solar-system:v1
+        image: saikiran8050/solar-system:v2
         ports:
         - containerPort: 80
