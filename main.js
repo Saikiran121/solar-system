@@ -75,7 +75,7 @@ function createSphere(radius, segments, color, position = [0, 0, 0], emissive = 
 const sun = createSphere(5, 64, 0xffff00, [0, 0, 0], 0xffff00, sunTexture);
 scene.add(sun);
 
-// Planet Data (Inner planets only for v1)
+// Planet Data (All 8 planets for v2)
 const planetData = [
     {
         name: 'Mercury', radius: 0.8, distance: 10, speed: 0.04,
@@ -92,10 +92,41 @@ const planetData = [
     {
         name: 'Mars', radius: 1.1, distance: 25, speed: 0.008,
         texture: textureLoader.load('/textures/mars.png')
+    },
+    {
+        name: 'Jupiter', radius: 3.5, distance: 35, speed: 0.005,
+        texture: textureLoader.load('/textures/jupiter.png')
+    },
+    {
+        name: 'Saturn', radius: 3.0, distance: 45, speed: 0.003,
+        texture: textureLoader.load('/textures/saturn.png'),
+        hasRings: true
+    },
+    {
+        name: 'Uranus', radius: 2.2, distance: 55, speed: 0.002,
+        color: 0xace5ee // Fallback color as texture generation failed
+    },
+    {
+        name: 'Neptune', radius: 2.1, distance: 65, speed: 0.001,
+        texture: textureLoader.load('/textures/neptune.png')
     }
 ];
 
 const planets = [];
+
+// Helper for Saturn's rings
+function createSaturnRings(radius) {
+    const ringGeometry = new THREE.RingGeometry(radius * 1.4, radius * 2.2, 64);
+    const ringMaterial = new THREE.MeshStandardMaterial({
+        color: 0xaaaaaa,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.7
+    });
+    const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+    ring.rotation.x = Math.PI / 2;
+    return ring;
+}
 
 // Create Planets and Orbits
 planetData.forEach((data) => {
@@ -104,8 +135,15 @@ planetData.forEach((data) => {
     scene.add(orbitGroup);
 
     // Planet
-    const planet = createSphere(data.radius, 32, 0xffffff, [data.distance, 0, 0], 0x000000, data.texture);
+    const planet = createSphere(data.radius, 32, data.color || 0xffffff, [data.distance, 0, 0], 0x000000, data.texture);
     orbitGroup.add(planet);
+
+    // Saturn's Rings
+    if (data.hasRings) {
+        const rings = createSaturnRings(data.radius);
+        rings.position.set(data.distance, 0, 0);
+        orbitGroup.add(rings);
+    }
 
     // Orbit visual (ring)
     const orbitGeometry = new THREE.RingGeometry(data.distance - 0.05, data.distance + 0.05, 128);
